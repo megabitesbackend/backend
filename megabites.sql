@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.7
--- Dumped by pg_dump version 9.5.7
+-- Dumped from database version 9.5.10
+-- Dumped by pg_dump version 9.5.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -77,7 +77,8 @@ CREATE TABLE donors (
     name character varying(100),
     email character varying(75) NOT NULL,
     password character varying(100) NOT NULL,
-    add_id integer
+    add_id integer,
+    phone_number character varying(100)
 );
 
 
@@ -110,6 +111,8 @@ ALTER SEQUENCE donors_donor_id_seq OWNED BY donors.donor_id;
 
 CREATE TABLE foods (
     food_id integer NOT NULL,
+    donor_id integer NOT NULL,
+    receiver_id integer,
     name character varying(50) NOT NULL,
     date_of_expiration timestamp without time zone NOT NULL,
     servings integer NOT NULL,
@@ -154,7 +157,8 @@ CREATE TABLE receivers (
     name character varying(100),
     email character varying(75) NOT NULL,
     password character varying(100) NOT NULL,
-    add_id integer
+    add_id integer,
+    phone_number character varying(100)
 );
 
 
@@ -228,7 +232,7 @@ SELECT pg_catalog.setval('addresses_add_id_seq', 1, false);
 -- Data for Name: donors; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
-COPY donors (donor_id, name, email, password, add_id) FROM stdin;
+COPY donors (donor_id, name, email, password, add_id, phone_number) FROM stdin;
 \.
 
 
@@ -243,7 +247,7 @@ SELECT pg_catalog.setval('donors_donor_id_seq', 1, false);
 -- Data for Name: foods; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
-COPY foods (food_id, name, date_of_expiration, servings, prepared, gluten, refrigerated, nuts, dairy, vegetarian) FROM stdin;
+COPY foods (food_id, donor_id, receiver_id, name, date_of_expiration, servings, prepared, gluten, refrigerated, nuts, dairy, vegetarian) FROM stdin;
 \.
 
 
@@ -258,7 +262,7 @@ SELECT pg_catalog.setval('foods_food_id_seq', 1, false);
 -- Data for Name: receivers; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
-COPY receivers (receiver_id, name, email, password, add_id) FROM stdin;
+COPY receivers (receiver_id, name, email, password, add_id, phone_number) FROM stdin;
 \.
 
 
@@ -323,6 +327,22 @@ ALTER TABLE ONLY receivers
 
 ALTER TABLE ONLY donors
     ADD CONSTRAINT donors_add_id_fkey FOREIGN KEY (add_id) REFERENCES addresses(add_id);
+
+
+--
+-- Name: foods_donor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vagrant
+--
+
+ALTER TABLE ONLY foods
+    ADD CONSTRAINT foods_donor_id_fkey FOREIGN KEY (donor_id) REFERENCES donors(donor_id);
+
+
+--
+-- Name: foods_receiver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vagrant
+--
+
+ALTER TABLE ONLY foods
+    ADD CONSTRAINT foods_receiver_id_fkey FOREIGN KEY (receiver_id) REFERENCES receivers(receiver_id);
 
 
 --
