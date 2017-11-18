@@ -14,7 +14,7 @@ from model import db, connect_to_db, Donor, Address, Receiver, Food
 # from passlib.hash import bcrypt
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import and_
 from geopy.geocoders import Nominatim
 
@@ -26,21 +26,18 @@ app.secret_key = "ABC"
 # Raises an error in Jinja
 # app.jinja_env.undefined = StrictUndefined
 
-
-
-
 @app.route('/donor-info.json')
 def fetch_donor_info(donor_id):
 
-    donor = Donor.query.get(donor_id)
-    donor_dict = {"id": donor.donor_id, 
-                  "name": donor.name,
-                  "phone": donor.phone_number,
-                  "email": donor.email,
+    # donor = Donor.query.get(donor_id)
+    donor_dict = {"id": 1, 
+                  "name": "Chez Panisse",
+                  "phone": "(510) 548-5525",
+                  "email": "alice@chezpanisse.com",
                   "address": {
-                      "address": donor.address.formatted_add,
-                      "lat": donor.address.lat,
-                      "lng": donor.address.lng,  
+                      "address": "1517 Shattuck Ave, Berkeley, CA 94709",
+                      "lat": 37.8796128,
+                      "lng": -122.2710068,  
                       }
                   }
 
@@ -51,56 +48,145 @@ def fetch_donor_info(donor_id):
 def fetch_receiver_info(receiver_id):
 
     receiver = Receiver.query.get(receiver_id)
-    receiver_dict = {"id": receiver.receiver_id, 
-                  "name": receiver.name,
-                  "phone": receiver.phone_number,
-                  "email": receiver.email,
+    receiver_dict = {"id": 1, 
+                  "name": "SF-Marin Food Bank",
+                  "phone": "(415)282-1900",
+                  "email": "paul@sf-marinfoodbank.org",
                   "address": {
-                      "address": receiver.address.formatted_add,
-                      "lat": receiver.address.lat,
-                      "lng": receiver.address.lng,  
+                      "address": "900 Pennsylvania Ave., SF, CA 94107",
+                      "lat": 37.7544355,
+                      "lng": -122.395706,  
                       }
                   }
 
     return jsonify(receiver_dict)
 
 
-@app.route('/pickup.json')
+@app.route('/pickups', methods=['GET', 'POST'])
 def fetch_pickup_info():
     """Dictionary of food items that have not been claimed"""
+    available_pickups = {1: {{"name": "Chez Panisse",
+                                 "phone": "(510) 548-5525",
+                                 "email": "alice@chezpanisse.com",
+                                 "address": {
+                                    "address": "1517 Shattuck Ave, Berkeley, CA 94709",
+                                    "lat": 37.8796128,
+                                    "lng": -122.2710068
+                                  }
+                                }, 
+                                "foodItems": [
+                                    {"id": 1,
+                                    "name": "Fort Bragg rockfish",
+                                    "servings": 20,
+                                    "expiration_date": datetime.now() + timedelta(days=2)
+                                    },                            
+                                    {"id": 2,
+                                    "name": "Chantrelle mushrooms",
+                                    "servings": 40,
+                                    "expiration_date": datetime.now() + timedelta(days=15)
+                                    }, 
+                                    {"id": 3,
+                                    "name": "Leeks",
+                                    "servings": 35,
+                                    "expiration_date": datetime.now() + timedelta(days=10)
+                                    }
+                                ]},
+                                2: {{"name": "Jupiter Taproom",
+                                   "phone": "(510)843-8277",
+                                   "email": "bob@jupitertaproom.com",
+                                   "address": {
+                                      "address": "2181 Shattuck Ave, Berkeley, CA 94704",
+                                      "lat": 37.8697972,
+                                      "lng": -122.2697709  
+                                    }
+                                  }, 
+                                "foodItems": [
+                                    {"id": 1,
+                                    "name": "Fort Bragg rockfish",
+                                    "servings": 20,
+                                    "expiration_date": datetime.now() + timedelta(days=2)
+                                    },                            
+                                    {"id": 2,
+                                    "name": "Chantrelle mushrooms",
+                                    "servings": 40,
+                                    "expiration_date": datetime.now() + timedelta(days=15)
+                                    }, 
+                                    {"id": 3,
+                                    "name": "Leeks",
+                                    "servings": 35,
+                                    "expiration_date": datetime.now() + timedelta(days=10)
+                                    }]}, 
+                                3: {{"name": "Whitechapel",
+                                   "phone": "(415)292-5800",
+                                   "email": "unicorn@whitechapel.com",
+                                   "address": {
+                                      "address": "600 Polk St., SF, CA 94102",
+                                      "lat": 37.7823999,
+                                      "lng": -122.4210646  
+                                    }}, 
+                                    "foodItems": [
+                                        {"id": 1,
+                                        "name": "Hamburgers",
+                                        "servings": 20,
+                                        "expiration_date": datetime.now() + timedelta(days=2)
+                                        },                            
+                                        {"id": 2,
+                                        "name": "Chantrelle mushrooms",
+                                        "servings": 40,
+                                        "expiration_date": datetime.now() + timedelta(days=15)
+                                        }, 
+                                        {"id": 3,
+                                        "name": "Leeks",
+                                        "servings": 35,
+                                        "expiration_date": datetime.now() + timedelta(days=10)
+                                        }                                
+                                    ]}}
 
-    food_lst = Food.query.filter(receiver_id = None).all()
-    available_pickups = {}
-    
-    #sets donor key
-    for food in food_lst: 
-        if food.donor_id not in available_pickups:
-            available_pickups[food.donor_id] = {"donor_id": food.donor_id,
-                                                "name": food.donor.name,
-                                                "email": food.donor.email,
-                                                "phone": food.donor.phone,
-                                                "address": {
-                                                    "formattedAddress": food.donor.address.formatted_add,
-                                                    "lat": food.donor.address.lat,
-                                                    "lng": food.donor.address.lng
-                                                }, 
-                                                "foodItems": []}
+    if request.method = "GET":
+        # food_lst = Food.query.filter(receiver_id = None).all()
+        
+        return jsonify(available_pickups) 
 
-    #sets food items 
-    for food in food_lst:
-      food_info = {}
+    elif request.method = "POST":  
 
-      food_info["id"] = food.food_id,
-      "name" = 
-      "serving" = 
-      "expiration_date" = 
+        available_pickups = available_pickups[1]["foodItems"] = {"id": 4,
+                                                                 "name": "Carrots",
+                                                                 "servings": 20,
+                                                                 "expiration_date": datetime.now() + timedelta(days=10)
+                                    }
+
+        return jsonify(available_pickups) 
 
 
-      available_pickups[food.donor_id]["foodItems"].append() 
+@app.route('/claims')
+def fetch_claim_info():
+    """Dictionary of food items that have not been claimed"""
 
+    # food_lst = Food.query.filter(receiver_id = None).all()
+    claimed_items = {1: {{"name": "Chez Panisse",
+                         "phone": "(510) 548-5525",
+                         "email": "alice@chezpanisse.com",
+                         "address": {
+                            "address": "1517 Shattuck Ave, Berkeley, CA 94709",
+                            "lat": 37.8796128,
+                            "lng": -122.2710068,  
+                          }}, 
+                        "foodItems": [
+                        {"id": 4,
+                        "name": "Duck breast",
+                        "servings": 12,
+                        "expiration_date": datetime.now() + timedelta(days=5)
+                        },
+                        {"id": 5,
+                        "name": "Hazelnut ice cream",
+                        "servings": 23,
+                        "expiration_date": datetime.now() + timedelta(days=30)
+                        }                               
+                            ]}
+    }   
 
+    return jsonify(claimed_items) 
 
-    return jsonify(available_pickups)    
 
 ##HELPER FUNCTION
 
@@ -109,8 +195,8 @@ def address_to_latlng(formatted_add):
     geolocator = Nominatim()
     location = geolocator.geocode(formatted_add)
 
-    return jsonify("streetAddress": formatted_add: {"lat": location.latitude, "lng":location.longitude})
-    
+    return jsonify("address": formatted_add: {"lat": location.latitude, "lng":location.longitude})
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
