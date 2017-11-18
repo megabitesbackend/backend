@@ -1,0 +1,19 @@
+{
+  "name": "megabites",
+  "version": "1.0.0",
+  "description": "Food waste platform application.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MegabitesApp/Megabites.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MegabitesApp/Megabites/issues"
+  },
+  "homepage": "https://github.com/MegabitesApp/Megabites#readme"
+}
