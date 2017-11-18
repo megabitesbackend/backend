@@ -13,10 +13,10 @@ from model import db, connect_to_db, Donor, Address, Receiver, Food
 
 # from passlib.hash import bcrypt
 
-# from flask_login import LoginManager, login_user, login_required, logout_user, current_user 
 import os
 from datetime import datetime
 from sqlalchemy import and_
+from geopy.geocoders import Nominatim
 
 
 app = Flask(__name__)
@@ -26,21 +26,52 @@ app.secret_key = "ABC"
 # Raises an error in Jinja
 # app.jinja_env.undefined = StrictUndefined
 
-######################################
-#For Registration and Login
-######################################
-
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-
-# login_manager.login_view = 'render_login_page'
 
 
-@app.route('/')
-def index():
-    """Homepage with map."""
 
-    return render_template("map.html")
+@app.route('/donor-info.json')
+def fetch_donor_info(donor_id):
+
+    donor = Donor.query.get(donor_id)
+    donor_dict = {"id": donor.donor_id, 
+                  "name": donor.name,
+                  "phone": donor.phone_number,
+                  "email": donor.email,
+                  "address": {
+                      "address": donor.address.formatted_add,
+                      "lat": donor.address.lat,
+                      "lng": donor.address.lng,  
+                      }
+                  }
+
+    return jsonify(donor_dict)
+
+
+@app.route('/receiver-info.json')
+def fetch_receiver_info(receiver_id):
+
+    receiver = Receiver.query.get(receiver_id)
+    receiver_dict = {"id": receiver.receiver_id, 
+                  "name": receiver.name,
+                  "phone": receiver.phone_number,
+                  "email": receiver.email,
+                  "address": {
+                      "address": receiver.address.formatted_add,
+                      "lat": receiver.address.lat,
+                      "lng": receiver.address.lng,  
+                      }
+                  }
+
+    return jsonify(receiver_dict)
+
+
+@app.route('/geocode')
+def address_to_latlng(formatted_add):
+
+    geolocator = Nominatim()
+    location = geolocator.geocode(formatted_add)
+
+    return jsonify("address": formatted_add: {"lat": location.latitude, "lng":location.longitude})
 
 
 
