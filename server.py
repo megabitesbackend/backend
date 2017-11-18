@@ -71,7 +71,45 @@ def address_to_latlng(formatted_add):
     geolocator = Nominatim()
     location = geolocator.geocode(formatted_add)
 
-    return jsonify("address": formatted_add: {"lat": location.latitude, "lng":location.longitude})
+    return jsonify("streetAddress": formatted_add: {"lat": location.latitude, "lng":location.longitude})
+
+
+@app.route('/pickup.json')
+def fetch_pickup_info():
+    """Dictionary of food items that have not been claimed"""
+
+    food_lst = Food.query.filter(receiver_id = None).all()
+    available_pickups = {}
+    
+    #sets donor key
+    for food in food_lst: 
+        if food.donor_id not in available_pickups:
+            available_pickups[food.donor_id] = {"donor_id": food.donor_id,
+                                                "name": food.donor.name,
+                                                "email": food.donor.email,
+                                                "phone": food.donor.phone,
+                                                "address": {
+                                                    "formattedAddress": food.donor.address.formatted_add,
+                                                    "lat": food.donor.address.lat,
+                                                    "lng": food.donor.address.lng
+                                                }, 
+                                                "foodItems": []}
+
+    #sets food items 
+    for food in food_lst:
+      food_info = {}
+
+      food_info["id"] = food.food_id,
+      "name" = 
+      "serving" = 
+      "expiration_date" = 
+
+
+      available_pickups[food.donor_id]["foodItems"].append() 
+
+
+
+    return jsonify(available_pickups)    
 
 
 if __name__ == "__main__":
