@@ -6,7 +6,7 @@ Food waste platform application.
 
 - Derek Johnson
 - Gideon Baik
-- Eileen 
+- Eileen Hays-Schwantes
 - Lyra Hall
 - Julie Nguyen
 - Andrew Saephan
