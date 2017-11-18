@@ -74,8 +74,6 @@ def address_to_latlng(formatted_add):
     return jsonify("address": formatted_add: {"lat": location.latitude, "lng":location.longitude})
 
 
-
-
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
