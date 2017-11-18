@@ -65,15 +65,6 @@ def fetch_receiver_info(receiver_id):
     return jsonify(receiver_dict)
 
 
-@app.route('/geocode')
-def address_to_latlng(formatted_add):
-
-    geolocator = Nominatim()
-    location = geolocator.geocode(formatted_add)
-
-    return jsonify("streetAddress": formatted_add: {"lat": location.latitude, "lng":location.longitude})
-
-
 @app.route('/pickup.json')
 def fetch_pickup_info():
     """Dictionary of food items that have not been claimed"""
@@ -111,6 +102,15 @@ def fetch_pickup_info():
 
     return jsonify(available_pickups)    
 
+##HELPER FUNCTION
+
+def address_to_latlng(formatted_add):
+
+    geolocator = Nominatim()
+    location = geolocator.geocode(formatted_add)
+
+    return jsonify("streetAddress": formatted_add: {"lat": location.latitude, "lng":location.longitude})
+    
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
