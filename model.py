@@ -9,6 +9,7 @@ db = SQLAlchemy()
 
 # Model definitions
 
+
 class Address(db.Model):
     """Standard format for address information for user location."""
 
@@ -37,9 +38,9 @@ class Donor(db.Model):
     email = db.Column(db.String(75), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     add_id = db.Column(db.ForeignKey(Address.add_id), nullable=True)
+    phone_number = db.Column(db.String(100), nullable=True)
 
-    address = db.relationship("Address", backref=db.backref("donors", 
-                                                            order_by=donor_id))
+    address = db.relationship("Address", backref=db.backref("donors"))
 
     def __init__(self, name, email, password, add_id):
         self.name = name
@@ -55,7 +56,8 @@ class Donor(db.Model):
 
     # Necessary functions for Flask-login
     # def get_id(self):
-    #     return str(self.user_id) 
+    #     return str(self.user_id)
+
 
 class Receiver(db.Model):
     """Receiver information collected when user registers."""
@@ -67,9 +69,9 @@ class Receiver(db.Model):
     email = db.Column(db.String(75), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     add_id = db.Column(db.ForeignKey(Address.add_id), nullable=True)
+    phone_number = db.Column(db.String(100), nullable=True)
 
-    address = db.relationship("Address", backref=db.backref("receivers", 
-                                                            order_by=receiver_id))
+    address = db.relationship("Address", backref=db.backref("receivers"))
 
     def __init__(self, name, email, password, add_id):
         self.name = name
@@ -85,7 +87,7 @@ class Receiver(db.Model):
 
     # Necessary functions for Flask-login
     # def get_id(self):
-    #     return str(self.user_id) 
+    #     return str(self.user_id)
 
 
 class Food(db.Model):
@@ -94,7 +96,9 @@ class Food(db.Model):
     __tablename__ = 'foods'
 
     food_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(50), nullable=False) 
+    donor_id = db.Column(db.ForeignKey(Donor.donor_id), nullable=False)
+    receiver_id = db.Column(db.ForeignKey(Receiver.receiver_id), nullable=True)
+    name = db.Column(db.String(50), nullable=False)
     date_of_expiration = db.Column(db.DateTime, nullable=False)
     servings = db.Column(db.Integer, nullable=False)
     prepared = db.Column(db.Boolean, nullable=False)
@@ -104,14 +108,14 @@ class Food(db.Model):
     dairy = db.Column(db.Boolean, nullable=False)
     vegetarian = db.Column(db.Boolean, nullable=False)
 
+    donor = db.relationship("Donor", backref=db.backref("donors"))
+    receiver = db.relationship("Receiver", backref=db.backref("receivers"))
+
     def __repr__(self):
         """Prints category object in a more helpful way"""
 
-        return "<Food: foods_id=%s name=%s>" % (self.cat_id,
+        return "<Food: foods_id=%s name=%s>" % (self.food_id,
                                                 self.name)
-
-
-  
 
 
 ##############################################################################
@@ -136,4 +140,4 @@ if __name__ == "__main__":
     print "Connected to DB."
 
     # # In case tables haven't been created, create them
-    # db.create_all()
+    db.create_all()
